@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="feltGrad" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#1f7a4d"/>
+      <stop offset="100%" stop-color="#0b4a2c"/>
+    </radialGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f7d774"/>
+      <stop offset="50%" stop-color="#d4a72c"/>
+      <stop offset="100%" stop-color="#f7d774"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="100" cy="100" r="96" fill="url(#feltGrad)" stroke="url(#ringGrad)" stroke-width="8"/>
+
+  <g fill="none" stroke="#f7d774" stroke-width="3" stroke-dasharray="10 9" opacity="0.85">
+    <circle cx="100" cy="100" r="80"/>
+  </g>
+
+  <g transform="translate(100,96)">
+    <path d="M0 -46
+             C 26 -22, 40 -2, 40 18
+             C 40 40, 22 52, 2 44
+             C 4 58, 10 66, 20 74
+             L -20 74
+             C -10 66, -4 58, -2 44
+             C -22 52, -40 40, -40 18
+             C -40 -2, -26 -22, 0 -46 Z"
+          fill="#f4f1e8"/>
+  </g>
+
+  <circle cx="100" cy="100" r="96" fill="none" stroke="#0b4a2c" stroke-width="2" opacity="0.4"/>
+</svg>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poker Night — Texas Hold'em</title>
+<meta name="description" content="Play multiplayer Texas Hold'em poker with 2-8 friends in your browser. Create a room, invite players, chat at the table, and battle for the chip lead.">
+<link rel="icon" type="image/svg+xml" href="assets/img/logo.svg">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- HOME -->
+<div id="screen-home" class="screen visible">
+  <div class="home-card">
+    <img src="assets/img/logo.svg" class="logo-img" alt="Poker Night logo">
+    <div class="home-title">Poker Night</div>
+    <div class="home-sub">Multiplayer Texas Hold'em for 2&ndash;8 players &mdash; right in your browser.</div>
+
+    <div class="home-panel">
+      <h3>Create a room</h3>
+      <div class="field-row"><input type="text" id="create-name" placeholder="Your name" maxlength="20"></div>
+      <button class="btn-primary" id="btn-create" style="width:100%">Create Room</button>
+    </div>
+
+    <div class="home-panel">
+      <h3>Join a room</h3>
+      <div class="field-row"><input type="text" id="join-name" placeholder="Your name" maxlength="20"></div>
+      <div class="field-row"><input type="text" id="join-code" placeholder="Room code" maxlength="5" style="text-transform:uppercase"></div>
+      <button class="btn-primary" id="btn-join" style="width:100%">Join Room</button>
+    </div>
+
+    <div class="error-text" id="home-error"></div>
+    <button class="link-btn" id="btn-open-rules">How to play &mdash; Game Rules</button>
+  </div>
+</div>
+
+<!-- LOBBY -->
+<div id="screen-lobby" class="screen">
+  <div class="lobby-wrap">
+    <div class="lobby-header">
+      <div>
+        <div style="font-size:13px;color:var(--muted)">Room Code</div>
+        <div class="room-code-badge" id="lobby-code">-----</div>
+      </div>
+      <img src="assets/img/logo.svg" alt="" style="width:50px;height:50px">
+    </div>
+
+    <ul class="player-list" id="lobby-players"></ul>
+
+    <div class="lobby-actions">
+      <button class="btn-primary" id="btn-start-game">Start Game</button>
+      <button class="btn-secondary" id="btn-open-rules-lobby">Game Rules</button>
+      <button class="btn-danger" id="btn-leave-lobby">Leave</button>
+    </div>
+    <div class="error-text" id="lobby-error"></div>
+
+    <div class="panel-box chat-box" style="margin-top:16px">
+      <div class="panel-title">Table Chat</div>
+      <div class="chat-messages" id="lobby-chat-messages"></div>
+      <form class="chat-form" id="lobby-chat-form">
+        <input type="text" id="lobby-chat-input" placeholder="Say something..." maxlength="300">
+        <button class="btn-secondary" type="submit">Send</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="screen-game" class="screen">
+  <div class="top-bar">
+    <div class="brand"><img src="assets/img/logo.svg" alt=""> Poker Night <span class="room-code-badge" id="game-code" style="font-size:13px;padding:3px 8px;margin-left:8px">-----</span></div>
+    <div class="top-bar-actions">
+      <button class="btn-secondary btn-small" id="btn-open-rules-game">Rules</button>
+      <button class="btn-secondary btn-small" id="btn-new-round">New Round</button>
+      <button class="btn-danger btn-small" id="btn-leave-game">Leave</button>
+    </div>
+  </div>
+
+  <div class="turn-banner" id="turn-banner"></div>
+
+  <div class="game-layout">
+    <div class="table-wrap">
+      <div class="poker-table" id="poker-table">
+        <div class="table-center">
+          <div class="community-cards" id="community-cards"></div>
+          <div class="pot-display" id="pot-display">Pot: 0</div>
+          <div class="phase-display" id="phase-display">Waiting for players</div>
+        </div>
+        <!-- seats injected by JS -->
+      </div>
+
+      <div class="action-bar" id="action-bar"></div>
+    </div>
+
+    <div class="side-panel">
+      <div class="panel-box" style="max-height:240px">
+        <div class="panel-title">Scoreboard</div>
+        <ul class="scoreboard-list" id="scoreboard-list"></ul>
+      </div>
+      <div class="panel-box chat-box">
+        <div class="panel-title">Table Chat</div>
+        <div class="chat-messages" id="game-chat-messages"></div>
+        <form class="chat-form" id="game-chat-form">
+          <input type="text" id="game-chat-input" placeholder="Say something..." maxlength="300">
+          <button class="btn-secondary" type="submit">Send</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RULES MODAL -->
+<div class="modal-overlay" id="modal-rules">
+  <div class="modal-box">
+    <h2>Game Rules &mdash; Texas Hold'em</h2>
+    <p>Poker Night plays standard No-Limit Texas Hold'em, the same core rules used at home games and casinos worldwide, adapted for 2&ndash;8 players.</p>
+
+    <h3>Objective</h3>
+    <p>Make the best 5-card hand using any combination of your 2 private hole cards and the 5 shared community cards, or make everyone else fold. Chips are the score &mdash; the player with the most chips is winning.</p>
+
+    <h3>Hand rankings (best to worst)</h3>
+    <ol>
+      <li>Straight Flush &mdash; five sequential cards, same suit</li>
+      <li>Four of a Kind &mdash; four cards of the same rank</li>
+      <li>Full House &mdash; three of a kind + a pair</li>
+      <li>Flush &mdash; five cards of the same suit</li>
+      <li>Straight &mdash; five sequential cards, any suits</li>
+      <li>Three of a Kind</li>
+      <li>Two Pair</li>
+      <li>One Pair</li>
+      <li>High Card</li>
+    </ol>
+
+    <h3>How a hand plays out</h3>
+    <p><strong>Blinds:</strong> each hand, one seat posts the small blind and the next posts the big blind &mdash; forced bets that start the pot.<br>
+    <strong>Hole cards:</strong> every player is dealt 2 private cards.<br>
+    <strong>Pre-flop betting:</strong> starting left of the big blind, players fold, call, or raise.<br>
+    <strong>The Flop:</strong> 3 community cards are dealt, followed by another betting round.<br>
+    <strong>The Turn:</strong> a 4th community card, then betting.<br>
+    <strong>The River:</strong> the 5th and final community card, then final betting.<br>
+    <strong>Showdown:</strong> remaining players reveal their hands &mdash; the best 5-card hand wins the pot. If everyone but one player folds at any point, that player wins the pot immediately without a showdown.</p>
+
+    <h3>Betting actions</h3>
+    <p><strong>Fold:</strong> give up your hand and any chance at the pot.<br>
+    <strong>Check:</strong> pass the action with no bet, only allowed if no one has bet yet this round.<br>
+    <strong>Call:</strong> match the current bet to stay in the hand.<br>
+    <strong>Bet / Raise:</strong> increase the amount others must match.<br>
+    <strong>All-in:</strong> bet every chip you have left. If you're all-in for less than the full bet, a side pot is created for the remaining players.</p>
+
+    <h3>This app's house rules</h3>
+    <ul>
+      <li>2&ndash;8 players per room, seated by whoever holds the room code.</li>
+      <li>Seating and turn order reshuffle randomly before every new hand.</li>
+      <li>The host can kick any player from the lobby or mid-game; a kicked player is notified immediately.</li>
+      <li>Leaving mid-hand folds you automatically and skips you for future hands.</li>
+      <li>Joining mid-hand puts you in spectator mode until the next hand deals; spectators don't appear on the scoreboard.</li>
+      <li>The host can cancel the current hand and immediately deal a new one with the New Round button &mdash; all bets from the cancelled hand are refunded.</li>
+    </ul>
+    <div class="modal-close-row"><button class="btn-primary" id="btn-close-rules">Got it</button></div>
+  </div>
+</div>
+
+<!-- KICKED OVERLAY -->
+<div class="kick-overlay" id="kick-overlay">
+  <div>
+    <h2 id="kick-message">You were kicked</h2>
+    <button class="btn-primary" id="btn-kick-ok">Back to Home</button>
+  </div>
+</div>
+
+<script src="assets/js/sound.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# PHP / local config overrides
+config.local.php
+
+# Logs
+*.log
+error_log
+
+# Dependencies (if any are added later)
+/vendor/
+/node_modules/

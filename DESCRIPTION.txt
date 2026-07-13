@@ -1,0 +1,6 @@
+Suggested GitHub repo description (short, for the "About" field):
+
+Multiplayer Texas Hold'em poker for 2-8 players — PHP + MySQL + vanilla JS, runs on stock XAMPP. Host controls, live chat, spectator mode, sound effects, and a full side-pot betting engine.
+
+Suggested topics/tags:
+poker, texas-holdem, php, mysql, javascript, multiplayer-game, xampp, card-game, web-game
