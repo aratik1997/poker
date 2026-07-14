@@ -7,6 +7,14 @@ let lastChatId = 0;
 let pollTimer = null;
 let unlocked = false;
 
+function resetRenderCache() {
+    lastLobbyKey = null;
+    lastCommunityKey = null;
+    lastSeatsKey = null;
+    lastScoreboardKey = null;
+    lastActionBarKey = null;
+}
+
 function unlockAudioOnce() {
     if (unlocked) return;
     unlocked = true;
@@ -83,6 +91,7 @@ document.getElementById('btn-create').addEventListener('click', async () => {
         const data = await apiPost('create_room.php', { name });
         saveSession({ token: data.token, room_code: data.room_code });
         lastChatId = 0; lastEventSeq = -1;
+        resetRenderCache();
         startPolling();
     } catch (e) { showHomeError(e.message); }
 });
@@ -95,6 +104,7 @@ document.getElementById('btn-join').addEventListener('click', async () => {
         const data = await apiPost('join_room.php', { name, room_code: code });
         saveSession({ token: data.token, room_code: data.room_code });
         lastChatId = 0; lastEventSeq = -1;
+        resetRenderCache();
         startPolling();
     } catch (e) { showHomeError(e.message); }
 });
@@ -213,8 +223,18 @@ function playEventSound(type) {
 }
 
 /* ---------------- Lobby rendering ---------------- */
+let lastLobbyKey = null;
 function renderLobby(data) {
     document.getElementById('lobby-code').textContent = data.room.code;
+
+    const key = JSON.stringify(data.players) + '|' + data.you.is_host;
+    const startBtn = document.getElementById('btn-start-game');
+    startBtn.style.display = data.you.is_host ? 'inline-block' : 'none';
+    startBtn.disabled = data.players.length < 2;
+    document.getElementById('btn-new-round').style.display = 'none';
+    if (key === lastLobbyKey) return;
+    lastLobbyKey = key;
+
     const list = document.getElementById('lobby-players');
     list.innerHTML = '';
     data.players.forEach(p => {
@@ -239,20 +259,20 @@ function renderLobby(data) {
             catch (e) { alert(e.message); }
         });
     });
-
-    const startBtn = document.getElementById('btn-start-game');
-    startBtn.style.display = data.you.is_host ? 'inline-block' : 'none';
-    startBtn.disabled = data.players.length < 2;
-    document.getElementById('btn-new-round').style.display = 'none';
 }
 
 /* ---------------- Game rendering ---------------- */
+let lastCommunityKey = null;
 function renderGame(data) {
     document.getElementById('game-code').textContent = data.room.code;
     document.getElementById('btn-new-round').style.display = data.you.is_host ? 'inline-block' : 'none';
 
-    document.getElementById('community-cards').innerHTML =
-        data.room.community_cards.map(c => cardHTML(c, true)).join('');
+    const communityKey = JSON.stringify(data.room.community_cards);
+    if (communityKey !== lastCommunityKey) {
+        lastCommunityKey = communityKey;
+        document.getElementById('community-cards').innerHTML =
+            data.room.community_cards.map(c => cardHTML(c, true)).join('');
+    }
     document.getElementById('pot-display').textContent = 'Pot: ' + data.room.pot;
 
     const phaseLabels = { waiting: 'Waiting for players', preflop: 'Pre-Flop', flop: 'Flop', turn: 'Turn', river: 'River', showdown: 'Showdown' };
@@ -284,11 +304,21 @@ function renderTurnBanner(data) {
     }
 }
 
+let lastSeatsKey = null;
 function renderSeats(data) {
+    const seated = data.players.filter(p => p.seat !== null).sort((a, b) => a.seat - b.seat);
+
+    const seatsKey = JSON.stringify(seated.map(p => ({
+        id: p.id, seat: p.seat, chips: p.chips, status: p.status,
+        last_action: p.last_action, bet_this_round: p.bet_this_round,
+        hole_cards: p.hole_cards, card_count: p.card_count, is_me: p.is_me,
+    }))) + '|' + data.room.dealer_seat + '|' + data.room.current_turn_seat + '|' + data.you.is_host;
+    if (seatsKey === lastSeatsKey) return;
+    lastSeatsKey = seatsKey;
+
     const table = document.getElementById('poker-table');
     table.querySelectorAll('.seat').forEach(s => s.remove());
 
-    const seated = data.players.filter(p => p.seat !== null).sort((a, b) => a.seat - b.seat);
     if (seated.length === 0) return;
 
     let meIndex = seated.findIndex(p => p.is_me);
@@ -340,7 +370,12 @@ function renderSeats(data) {
     });
 }
 
+let lastScoreboardKey = null;
 function renderScoreboard(scoreboard) {
+    const key = JSON.stringify(scoreboard);
+    if (key === lastScoreboardKey) return;
+    lastScoreboardKey = key;
+
     const list = document.getElementById('scoreboard-list');
     list.innerHTML = scoreboard.map((p, i) => `
         <li><span><span class="rank">#${i + 1}</span>${escapeHtml(p.name)}</span><span>${p.chips}</span></li>
@@ -348,15 +383,24 @@ function renderScoreboard(scoreboard) {
 }
 
 let wasYourTurn = false;
+let lastActionBarKey = null;
 function renderActionBar(data) {
-    const bar = document.getElementById('action-bar');
-    bar.innerHTML = '';
-
     if (!data.you.is_your_turn) {
         wasYourTurn = false;
+        lastActionBarKey = null;
+        document.getElementById('action-bar').innerHTML = '';
         return;
     }
+
+    const key = [data.you.to_call, data.you.chips, data.you.min_raise_total,
+        data.you.bet_this_round, data.room.current_bet].join('|');
+    if (key === lastActionBarKey) return;
+    lastActionBarKey = key;
+
     if (!wasYourTurn) { PokerSound.yourTurn(); wasYourTurn = true; }
+
+    const bar = document.getElementById('action-bar');
+    bar.innerHTML = '';
 
     const toCall = data.you.to_call;
     const chips = data.you.chips;
