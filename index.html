@@ -48,6 +48,17 @@
 
     <ul class="player-list" id="lobby-players"></ul>
 
+    <div class="bot-row" id="lobby-bot-row" style="display:none">
+      <label>Add a bot
+        <select id="bot-difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </label>
+      <button class="btn-secondary" id="add-bot-btn" type="button">🤖 Add Bot</button>
+    </div>
+
     <div class="lobby-actions">
       <button class="btn-primary" id="btn-start-game">Start Game</button>
       <button class="btn-secondary" id="btn-open-rules-lobby">Game Rules</button>

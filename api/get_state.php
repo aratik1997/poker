@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/game_engine.php';
+require_once __DIR__ . '/../includes/bots.php';
 
 $pdo = get_db();
 $token = $_GET['token'] ?? '';
@@ -19,7 +20,8 @@ $room = get_room_by_id($pdo, $player['room_id']);
 if (!$room) json_error('Room not found', 404);
 
 maybe_advance_from_showdown($pdo, $room);
-$room = get_room_by_id($pdo, $room['id']); // reload in case a hand was just dealt
+advance_bots($pdo, (int)$room['id']); // a bot whose turn is due acts here, on the regular poll
+$room = get_room_by_id($pdo, $room['id']); // reload in case a hand was just dealt or a bot acted
 $player = get_player_by_token($pdo, $token); // reload player too
 
 $allPlayers = get_room_players($pdo, $room['id']);
@@ -35,6 +37,8 @@ $publicPlayers = array_map(function ($p) use ($player) {
         'seat' => $p['seat'] === null ? null : (int)$p['seat'],
         'status' => $p['status'],
         'is_host' => (bool)$p['is_host'],
+        'is_bot' => (bool)$p['is_bot'],
+        'bot_difficulty' => $p['bot_difficulty'],
         'is_me' => $isMe,
         'bet_this_round' => (int)$p['bet_this_round'],
         'last_action' => $p['last_action'],

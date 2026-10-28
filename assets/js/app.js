@@ -224,8 +224,26 @@ function playEventSound(type) {
 
 /* ---------------- Lobby rendering ---------------- */
 let lastLobbyKey = null;
+let botControlsWired = false;
+
 function renderLobby(data) {
     document.getElementById('lobby-code').textContent = data.room.code;
+
+    if (!botControlsWired) {
+        botControlsWired = true;
+        document.getElementById('add-bot-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('add-bot-btn');
+            btn.disabled = true;
+            try {
+                await apiPost('add_bot.php', { token: session.token, difficulty: document.getElementById('bot-difficulty').value });
+            } catch (e) {
+                alert(e.message);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    }
+    document.getElementById('lobby-bot-row').style.display = data.you.is_host ? 'flex' : 'none';
 
     const key = JSON.stringify(data.players) + '|' + data.you.is_host;
     const startBtn = document.getElementById('btn-start-game');
@@ -245,6 +263,7 @@ function renderLobby(data) {
                 ${escapeHtml(p.name)}
                 ${p.is_host ? '<span class="host-badge">HOST</span>' : ''}
                 ${p.is_me ? '<span class="you-badge">(you)</span>' : ''}
+                ${p.is_bot ? `<span class="host-badge">🤖 ${escapeHtml(p.bot_difficulty || 'bot')}</span>` : ''}
             </span>
             <span style="display:flex;align-items:center;gap:10px">
                 <span style="color:var(--gold-light);font-size:13px">${p.chips} chips</span>

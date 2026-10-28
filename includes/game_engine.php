@@ -33,6 +33,10 @@ function start_hand(PDO $pdo, int $roomId): void {
     // Remove anyone who asked to leave or was kicked - they no longer occupy a seat.
     $pdo->prepare("DELETE FROM players WHERE room_id = ? AND status IN ('left','kicked')")->execute([$roomId]);
 
+    // Clear every player's contributions from the previous hand, including anyone just eliminated.
+    // Otherwise an eliminated player's old contribution would be counted into this hand's side pots.
+    $pdo->prepare("UPDATE players SET bet_this_round=0, contributed_total=0 WHERE room_id = ?")->execute([$roomId]);
+
     $players = get_room_players($pdo, $roomId);
     $eligible = array_values(array_filter($players, fn($p) => $p['chips'] > 0));
     // Anyone with 0 chips is eliminated - keep them (for the scoreboard) but they never get a seat again.

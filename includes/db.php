@@ -96,4 +96,12 @@ function init_schema(PDO $pdo) {
             INDEX (room_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
+
+    // Computer players, added after the first release: existing databases get the columns here.
+    if (!$pdo->query("SHOW COLUMNS FROM players LIKE 'is_bot'")->fetch()) {
+        $pdo->exec("ALTER TABLE players ADD COLUMN is_bot TINYINT(1) NOT NULL DEFAULT 0, ADD COLUMN bot_difficulty VARCHAR(10) NULL");
+    }
+    if (!$pdo->query("SHOW COLUMNS FROM rooms LIKE 'bot_next_at'")->fetch()) {
+        $pdo->exec("ALTER TABLE rooms ADD COLUMN bot_next_at DATETIME NULL");
+    }
 }
